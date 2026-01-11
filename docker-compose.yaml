@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:18.1
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: horsy_service
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: horsy
+    volumes:
+      - ./postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U horsy_service -d horsy"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 2s
+
+  horsy_api:
+    image: execaus/horsy_api:latest
+    container_name: horsy_api
+    restart: unless-stopped
+    ports:
+      - "5174:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  horsy_web:
+    image: execaus/horsy_web:latest
+    container_name: horsy_web
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      horsy_api:
+        condition: service_started

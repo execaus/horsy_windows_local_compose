@@ -1,2 +1,2 @@
-docker compose up
+docker compose up --platform linux/amd64
 pause
